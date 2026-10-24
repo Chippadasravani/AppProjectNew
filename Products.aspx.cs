@@ -2,11 +2,11 @@ using System;
 using System.Data.Common;
 using System.Data.Entity.Core;
 using System.Data.Entity.Infrastructure;
-using System.Globalization;
 using System.Linq;
 using System.Web.UI;
 using AppProjectNew.Data;
 using AppProjectNew.Models;
+using AppProjectNew.Validation;
 
 namespace AppProjectNew
 {
@@ -28,29 +28,22 @@ namespace AppProjectNew
                 return;
             }
 
-            decimal price;
-            int stockQuantity;
-            if (!decimal.TryParse(priceInput.Text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out price) ||
-                price < 0 || price > 9999999999999999.99m || decimal.Round(price, 2) != price)
+            Product productToSave;
+            string validationError;
+            if (!ProductInputValidator.TryCreate(
+                nameInput.Text,
+                skuInput.Text,
+                descriptionInput.Text,
+                priceInput.Text,
+                stockInput.Text,
+                out productToSave,
+                out validationError))
             {
-                SetStatus("Enter a non-negative price with no more than two decimal places.", true);
+                SetStatus(validationError, true);
                 return;
             }
 
-            if (!int.TryParse(stockInput.Text, NumberStyles.None, CultureInfo.InvariantCulture, out stockQuantity))
-            {
-                SetStatus("Enter a whole number for stock quantity.", true);
-                return;
-            }
-
-            var name = nameInput.Text.Trim();
-            var sku = skuInput.Text.Trim();
-            var description = descriptionInput.Text.Trim();
-            if (name.Length == 0 || name.Length > 120 || sku.Length == 0 || sku.Length > 40 || description.Length > 1000)
-            {
-                SetStatus("Check product name, SKU, and description lengths.", true);
-                return;
-            }
+            var sku = productToSave.Sku;
 
             try
             {
@@ -63,15 +56,7 @@ namespace AppProjectNew
                         return;
                     }
 
-                    db.Products.Add(new Product
-                    {
-                        Name = name,
-                        Sku = sku,
-                        Description = description,
-                        Price = price,
-                        StockQuantity = stockQuantity,
-                        CreatedUtc = DateTime.UtcNow
-                    });
+                    db.Products.Add(productToSave);
                     db.SaveChanges();
                 }
 

@@ -27,3 +27,11 @@ The first visit creates the `ProductCatalog` LocalDB database and `Products` tab
 - `Web.config` stores the LocalDB connection string and Entity Framework provider setup.
 
 To use another SQL Server instance, update the `ProductDbContext` connection string in `Web.config`.
+
+## Run unit tests
+
+The product input validation tests target .NET 8 and run cross-platform:
+
+```sh
+dotnet test tests/AppProjectNew.UnitTests/AppProjectNew.UnitTests.csproj
+```

@@ -17,6 +17,7 @@
                 </div>
                 <a class="secondary-link" href="Calculator.aspx">Open sum calculator</a>
                 <a class="secondary-link" href="ProductQuantity.aspx">View stock totals</a>
+                <a class="secondary-link" href="Cart.aspx">View cart</a>
             </header>
 
             <section class="entry-section" aria-labelledby="entry-title">
@@ -70,13 +71,18 @@
                     <span class="section-index">LATEST 50</span>
                 </div>
                 <div class="table-scroll">
-                    <asp:GridView ID="productsGrid" runat="server" AutoGenerateColumns="false" CssClass="product-table" GridLines="None" EmptyDataText="No products yet. Add the first one above.">
+                    <asp:GridView ID="productsGrid" runat="server" AutoGenerateColumns="false" CssClass="product-table" GridLines="None" EmptyDataText="No products yet. Add the first one above." OnRowCommand="productsGrid_RowCommand">
                         <Columns>
                             <asp:BoundField DataField="Name" HeaderText="Product" HtmlEncode="true" />
                             <asp:BoundField DataField="Sku" HeaderText="SKU" HtmlEncode="true" />
                             <asp:BoundField DataField="Price" HeaderText="Price" DataFormatString="{0:N2}" />
                             <asp:BoundField DataField="StockQuantity" HeaderText="In stock" />
                             <asp:BoundField DataField="CreatedUtc" HeaderText="Added (UTC)" DataFormatString="{0:yyyy-MM-dd HH:mm}" />
+                            <asp:TemplateField HeaderText="Cart">
+                                <ItemTemplate>
+                                    <asp:Button runat="server" CommandName="AddToCart" CommandArgument='<%# Eval("Id") %>' Text="Add to cart" CssClass="primary-button" />
+                                </ItemTemplate>
+                            </asp:TemplateField>
                         </Columns>
                     </asp:GridView>
                 </div>

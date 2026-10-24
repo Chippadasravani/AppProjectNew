@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Entity.Core;
 using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.Web;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using AppProjectNew.Data;
 using AppProjectNew.Models;
 using AppProjectNew.Validation;
@@ -95,6 +98,61 @@ namespace AppProjectNew
             BindProducts(updateStatus: false);
         }
 
+        protected void productsGrid_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (!string.Equals(e.CommandName, "AddToCart", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            if (!int.TryParse(e.CommandArgument?.ToString(), out var productId))
+            {
+                SetStatus("Unable to add that product to the cart.", true);
+                return;
+            }
+
+            try
+            {
+                using (var db = new ProductDbContext())
+                {
+                    var product = db.Products.FirstOrDefault(item => item.Id == productId);
+                    if (product == null)
+                    {
+                        SetStatus("That product could not be found.", true);
+                        return;
+                    }
+
+                    var cart = GetCart();
+                    var existing = cart.FirstOrDefault(item => item.ProductId == product.Id);
+                    if (existing == null)
+                    {
+                        cart.Add(new CartItem
+                        {
+                            ProductId = product.Id,
+                            Name = product.Name,
+                            Price = product.Price,
+                            Quantity = 1
+                        });
+                    }
+                    else
+                    {
+                        existing.Quantity += 1;
+                    }
+
+                    HttpContext.Current.Session["CartItems"] = cart;
+                    SetStatus($"{product.Name} was added to the cart.", false);
+                }
+            }
+            catch (DbException)
+            {
+                SetStatus("The product database could not be reached. Check the LocalDB connection.", true);
+            }
+            catch (EntityException)
+            {
+                SetStatus("The product database could not be reached. Check the LocalDB connection.", true);
+            }
+        }
+
         private void BindProducts(bool updateStatus = true)
         {
             try
@@ -127,6 +185,12 @@ namespace AppProjectNew
                     SetStatus("The product database could not be reached. Check the LocalDB connection.", true);
                 }
             }
+        }
+
+        private static List<CartItem> GetCart()
+        {
+            var cart = HttpContext.Current.Session["CartItems"] as List<CartItem>;
+            return cart ?? new List<CartItem>();
         }
 
         private void SetStatus(string message, bool isError)

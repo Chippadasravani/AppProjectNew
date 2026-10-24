@@ -47,6 +47,7 @@
     <Content Include="Products.aspx" />
     <Content Include="Products.css" />
     <Content Include="ProductQuantity.aspx" />
+    <Content Include="Cart.aspx" />
     <Content Include="CreateProductsTable.sql" />
     <Content Include="Web.config" />
     <Compile Include="Calculator.aspx.cs">
@@ -67,6 +68,13 @@
     <Compile Include="ProductQuantity.aspx.designer.cs">
       <DependentUpon>ProductQuantity.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Cart.aspx.cs">
+      <DependentUpon>Cart.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Cart.aspx.designer.cs">
+      <DependentUpon>Cart.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CartItem.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="ProductDbContext.cs" />
     <Compile Include="ProductDatabaseErrorClassifier.cs" />

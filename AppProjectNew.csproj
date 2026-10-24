@@ -46,6 +46,7 @@
     <Content Include="Calculator.css" />
     <Content Include="Products.aspx" />
     <Content Include="Products.css" />
+    <Content Include="ProductQuantity.aspx" />
     <Content Include="CreateProductsTable.sql" />
     <Content Include="Web.config" />
     <Compile Include="Calculator.aspx.cs">
@@ -59,6 +60,12 @@
     </Compile>
     <Compile Include="Products.aspx.designer.cs">
       <DependentUpon>Products.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ProductQuantity.aspx.cs">
+      <DependentUpon>ProductQuantity.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ProductQuantity.aspx.designer.cs">
+      <DependentUpon>ProductQuantity.aspx</DependentUpon>
     </Compile>
     <Compile Include="Product.cs" />
     <Compile Include="ProductDbContext.cs" />

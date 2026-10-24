@@ -16,6 +16,7 @@
                     <h1>Product catalog</h1>
                 </div>
                 <a class="secondary-link" href="Calculator.aspx">Open sum calculator</a>
+                <a class="secondary-link" href="ProductQuantity.aspx">View stock totals</a>
             </header>
 
             <section class="entry-section" aria-labelledby="entry-title">

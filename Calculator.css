@@ -1,0 +1,146 @@
+:root {
+    color-scheme: light;
+    font-family: Georgia, "Times New Roman", serif;
+    background: #f0f2ed;
+    color: #1e302c;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background-color: #f0f2ed;
+    background-image: linear-gradient(135deg, rgba(39, 89, 76, 0.06) 25%, transparent 25%), linear-gradient(315deg, rgba(39, 89, 76, 0.04) 25%, transparent 25%);
+    background-position: 0 0, 18px 18px;
+    background-size: 36px 36px;
+}
+
+.page-shell {
+    display: grid;
+    min-height: 100vh;
+    place-items: center;
+    padding: 24px;
+}
+
+.calculator {
+    width: min(100%, 560px);
+    padding: clamp(28px, 7vw, 56px);
+    border: 1px solid #cbd5cf;
+    border-top: 5px solid #c65f3d;
+    background: #fbfcf9;
+    box-shadow: 0 18px 50px rgba(30, 48, 44, 0.08);
+}
+
+.eyebrow {
+    margin: 0 0 14px;
+    color: #a34b30;
+    font-family: "Courier New", monospace;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(2rem, 8vw, 3.15rem);
+    font-weight: 500;
+    line-height: 1.08;
+}
+
+.intro {
+    margin: 12px 0 34px;
+    color: #52625d;
+    font-size: 1.05rem;
+    line-height: 1.5;
+}
+
+.fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+    align-items: end;
+    gap: 12px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 9px;
+    color: #43534e;
+    font-family: "Courier New", monospace;
+    font-size: 0.8rem;
+}
+
+.number-input {
+    width: 100%;
+    min-width: 0;
+    height: 54px;
+    padding: 0 12px;
+    border: 1px solid #aab9b1;
+    border-radius: 4px;
+    background: #fff;
+    color: #1e302c;
+    font-family: "Courier New", monospace;
+    font-size: 1.15rem;
+}
+
+.number-input:focus {
+    border-color: #276653;
+    outline: 3px solid rgba(39, 102, 83, 0.18);
+}
+
+.operator {
+    padding-bottom: 13px;
+    color: #c65f3d;
+    font-size: 1.6rem;
+    text-align: center;
+}
+
+.calculate-button {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 24px;
+    border: 0;
+    border-radius: 4px;
+    background: #276653;
+    color: #fff;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.calculate-button:hover {
+    background: #1e5041;
+}
+
+.calculate-button:focus-visible {
+    outline: 3px solid #c65f3d;
+    outline-offset: 3px;
+}
+
+.result {
+    display: block;
+    min-height: 1.5em;
+    margin-top: 20px;
+    color: #1e5041;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+@media (max-width: 440px) {
+    .page-shell {
+        padding: 14px;
+    }
+
+    .fields {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .operator {
+        display: none;
+    }
+}

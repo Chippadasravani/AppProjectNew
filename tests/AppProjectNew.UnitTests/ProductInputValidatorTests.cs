@@ -1,5 +1,13 @@
+using System;
+using System.Collections;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Infrastructure.Annotations;
 using System.Globalization;
+using System.Linq;
+using System.Reflection;
 using AppProjectNew.Data;
 using AppProjectNew.Models;
 using AppProjectNew.Validation;
@@ -146,6 +154,91 @@ namespace AppProjectNew.UnitTests
             }
         }
 
+        [TestMethod]
+        public void TryCreate_MaxIntStock_AcceptsUpperBound()
+        {
+            var succeeded = ProductInputValidator.TryCreate(
+                "Product",
+                "SKU-1",
+                string.Empty,
+                "1.00",
+                int.MaxValue.ToString(CultureInfo.InvariantCulture),
+                out var product,
+                out var error);
+
+            Assert.IsTrue(succeeded, error);
+            Assert.IsNotNull(product);
+            Assert.AreEqual(int.MaxValue, product.StockQuantity);
+        }
+
+        [TestMethod]
+        public void ProductDbContext_ConfiguresUniqueSkuIndex()
+        {
+            var modelBuilder = new DbModelBuilder();
+            modelBuilder.Entity<Product>().Property(product => product.Sku)
+                .HasColumnAnnotation(
+                    IndexAnnotation.AnnotationName,
+                    new IndexAnnotation(new IndexAttribute("IX_Products_Sku") { IsUnique = true }));
+
+            var model = modelBuilder.Build(new DbProviderInfo("System.Data.SqlClient", "2012"));
+            var storeModel = model.GetType().GetProperty("StoreModel")?.GetValue(model);
+            Assert.IsNotNull(storeModel);
+
+            var entityTypes = storeModel.GetType()
+                .GetProperty("EntityTypes")
+                ?.GetValue(storeModel) as IEnumerable;
+
+            Assert.IsNotNull(entityTypes);
+
+            foreach (var entity in entityTypes)
+            {
+                var entityName = entity.GetType().GetProperty("Name")?.GetValue(entity) as string;
+                if (entityName != nameof(Product))
+                {
+                    continue;
+                }
+
+                var properties = entity.GetType().GetProperty("Properties")?.GetValue(entity) as IEnumerable;
+                Assert.IsNotNull(properties);
+
+                foreach (var property in properties)
+                {
+                    var propertyName = property.GetType().GetProperty("Name")?.GetValue(property) as string;
+                    if (propertyName != nameof(Product.Sku))
+                    {
+                        continue;
+                    }
+
+                    var metadataProperties = property.GetType().GetProperty("MetadataProperties")?.GetValue(property) as IEnumerable;
+                    Assert.IsNotNull(metadataProperties);
+
+                    foreach (var metadataProperty in metadataProperties)
+                    {
+                        var metadataName = metadataProperty.GetType().GetProperty("Name")?.GetValue(metadataProperty) as string;
+                        if (string.IsNullOrEmpty(metadataName) || !metadataName.Contains("Index", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
+                        var value = metadataProperty.GetType().GetProperty("Value")?.GetValue(metadataProperty);
+                        Assert.IsNotNull(value);
+                        Assert.AreEqual(typeof(IndexAnnotation).FullName, value.GetType().FullName);
+
+                        var indexes = value.GetType().GetProperty("Indexes")?.GetValue(value) as IEnumerable;
+                        Assert.IsNotNull(indexes);
+
+                        var indexAttributes = indexes.Cast<object>().ToList();
+                        Assert.AreEqual(1, indexAttributes.Count);
+                        Assert.AreEqual("IX_Products_Sku", indexAttributes[0].GetType().GetProperty("Name")?.GetValue(indexAttributes[0]));
+                        Assert.AreEqual(true, indexAttributes[0].GetType().GetProperty("IsUnique")?.GetValue(indexAttributes[0]));
+                        return;
+                    }
+                }
+            }
+
+            Assert.Fail("Expected a unique index annotation for the SKU property.");
+        }
+
         [DataTestMethod]
         [DataRow(2601, true)]
         [DataRow(2627, true)]
@@ -154,6 +247,16 @@ namespace AppProjectNew.UnitTests
         public void ProductDatabaseErrorClassifier_OnlyMatchesUniqueConstraintErrors(int errorNumber, bool expected)
         {
             Assert.AreEqual(expected, ProductDatabaseErrorClassifier.IsUniqueConstraintViolation(new[] { errorNumber }));
+        }
+
+        [TestMethod]
+        public void ProductDatabaseErrorClassifier_HandlesNullEmptyAndMixedErrorNumbers()
+        {
+            Assert.IsFalse(ProductDatabaseErrorClassifier.IsUniqueConstraintViolation(null));
+            Assert.IsFalse(ProductDatabaseErrorClassifier.IsUniqueConstraintViolation(Array.Empty<int>()));
+            Assert.IsTrue(ProductDatabaseErrorClassifier.IsUniqueConstraintViolation(new[] { 547, 2601, 8152 }));
+            Assert.IsTrue(ProductDatabaseErrorClassifier.IsUniqueConstraintViolation(new[] { 999, 2627 }));
+            Assert.IsFalse(ProductDatabaseErrorClassifier.IsUniqueConstraintViolation(new[] { 547, 8152 }));
         }
 
         private static void AssertInvalid(

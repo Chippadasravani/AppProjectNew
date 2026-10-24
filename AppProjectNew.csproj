@@ -75,6 +75,7 @@
       <DependentUpon>Cart.aspx</DependentUpon>
     </Compile>
     <Compile Include="CartItem.cs" />
+    <Compile Include="CartService.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="ProductDbContext.cs" />
     <Compile Include="ProductDatabaseErrorClassifier.cs" />

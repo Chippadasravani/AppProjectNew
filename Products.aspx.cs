@@ -123,20 +123,10 @@ namespace AppProjectNew
                     }
 
                     var cart = GetCart();
-                    var existing = cart.FirstOrDefault(item => item.ProductId == product.Id);
-                    if (existing == null)
+                    if (!CartService.TryAddProduct(cart, product, out var addError))
                     {
-                        cart.Add(new CartItem
-                        {
-                            ProductId = product.Id,
-                            Name = product.Name,
-                            Price = product.Price,
-                            Quantity = 1
-                        });
-                    }
-                    else
-                    {
-                        existing.Quantity += 1;
+                        SetStatus(addError, true);
+                        return;
                     }
 
                     HttpContext.Current.Session["CartItems"] = cart;

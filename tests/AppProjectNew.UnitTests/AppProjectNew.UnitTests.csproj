@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.4.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.6.4" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.6.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../CartItem.cs" Link="CartItem.cs" />
+    <Compile Include="../../CartService.cs" Link="CartService.cs" />
+    <Compile Include="../../Product.cs" Link="Product.cs" />
+    <Compile Include="../../ProductDatabaseErrorClassifier.cs" Link="ProductDatabaseErrorClassifier.cs" />
+    <Compile Include="../../ProductDbContext.cs" Link="ProductDbContext.cs" />
+    <Compile Include="../../ProductInputValidator.cs" Link="ProductInputValidator.cs" />
+  </ItemGroup>
+</Project>

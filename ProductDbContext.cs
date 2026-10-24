@@ -1,4 +1,6 @@
 using System.Data.Entity;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity.Infrastructure.Annotations;
 using AppProjectNew.Models;
 
 namespace AppProjectNew.Data
@@ -23,11 +25,15 @@ namespace AppProjectNew.Data
 
             product.ToTable("Products");
             product.Property(item => item.Name).IsRequired().HasMaxLength(120);
-            product.Property(item => item.Sku).IsRequired().HasMaxLength(40);
+            product.Property(item => item.Sku)
+                .IsRequired()
+                .HasMaxLength(40)
+                .HasColumnAnnotation(
+                    IndexAnnotation.AnnotationName,
+                    new IndexAnnotation(new IndexAttribute("IX_Products_Sku") { IsUnique = true }));
             product.Property(item => item.Description).HasMaxLength(1000);
             product.Property(item => item.Price).HasPrecision(18, 2);
             product.Property(item => item.CreatedUtc).IsRequired();
-            product.HasIndex(item => item.Sku).IsUnique();
 
             base.OnModelCreating(modelBuilder);
         }

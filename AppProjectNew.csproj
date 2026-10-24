@@ -62,6 +62,7 @@
     </Compile>
     <Compile Include="Product.cs" />
     <Compile Include="ProductDbContext.cs" />
+    <Compile Include="ProductDatabaseErrorClassifier.cs" />
     <Compile Include="ProductInputValidator.cs" />
     <None Include="packages.config" />
   </ItemGroup>

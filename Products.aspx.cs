@@ -2,6 +2,8 @@ using System;
 using System.Data.Common;
 using System.Data.Entity.Core;
 using System.Data.Entity.Infrastructure;
+using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Web.UI;
 using AppProjectNew.Data;
@@ -52,7 +54,7 @@ namespace AppProjectNew
                     if (db.Products.Any(product => product.Sku == sku))
                     {
                         SetStatus("That SKU is already in use.", true);
-                        BindProducts();
+                        BindProducts(updateStatus: false);
                         return;
                     }
 
@@ -67,9 +69,19 @@ namespace AppProjectNew
                 descriptionInput.Text = string.Empty;
                 SetStatus("Product saved.", false);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException exception)
             {
-                SetStatus("The product could not be saved. The SKU may already exist.", true);
+                var sqlException = exception.GetBaseException() as SqlException;
+                if (sqlException != null && ProductDatabaseErrorClassifier.IsUniqueConstraintViolation(
+                    sqlException.Errors.Cast<SqlError>().Select(error => error.Number)))
+                {
+                    SetStatus("That SKU is already in use.", true);
+                }
+                else
+                {
+                    Trace.TraceError("Failed to save product: {0}", exception);
+                    SetStatus("The product could not be saved. Check the product details and try again.", true);
+                }
             }
             catch (DbException)
             {
@@ -80,10 +92,10 @@ namespace AppProjectNew
                 SetStatus("The product database could not be reached. Check the LocalDB connection.", true);
             }
 
-            BindProducts();
+            BindProducts(updateStatus: false);
         }
 
-        private void BindProducts()
+        private void BindProducts(bool updateStatus = true)
         {
             try
             {
@@ -101,13 +113,19 @@ namespace AppProjectNew
             {
                 productsGrid.DataSource = null;
                 productsGrid.DataBind();
-                SetStatus("The product database could not be reached. Check the LocalDB connection.", true);
+                if (updateStatus)
+                {
+                    SetStatus("The product database could not be reached. Check the LocalDB connection.", true);
+                }
             }
             catch (EntityException)
             {
                 productsGrid.DataSource = null;
                 productsGrid.DataBind();
-                SetStatus("The product database could not be reached. Check the LocalDB connection.", true);
+                if (updateStatus)
+                {
+                    SetStatus("The product database could not be reached. Check the LocalDB connection.", true);
+                }
             }
         }
 

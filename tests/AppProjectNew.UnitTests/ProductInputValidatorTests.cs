@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using AppProjectNew.Data;
 using AppProjectNew.Models;
 using AppProjectNew.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -34,6 +36,25 @@ namespace AppProjectNew.UnitTests
             Assert.AreEqual(0m, product.Price);
             Assert.AreEqual(0, product.StockQuantity);
             Assert.AreEqual(string.Empty, product.Description);
+        }
+
+        [TestMethod]
+        public void TryCreate_ExactUpperBounds_AcceptsInput()
+        {
+            var succeeded = ProductInputValidator.TryCreate(
+                new string('n', 120),
+                new string('s', 40),
+                new string('d', 1000),
+                "9999999999999999.99",
+                "1",
+                out var product,
+                out var error);
+
+            Assert.IsTrue(succeeded, error);
+            Assert.AreEqual(9999999999999999.99m, product.Price);
+            Assert.AreEqual(120, product.Name.Length);
+            Assert.AreEqual(40, product.Sku.Length);
+            Assert.AreEqual(1000, product.Description.Length);
         }
 
         [TestMethod]
@@ -93,6 +114,46 @@ namespace AppProjectNew.UnitTests
 
             Assert.IsFalse(isValid);
             Assert.AreEqual(2, validationResults.Count);
+        }
+
+        [TestMethod]
+        public void Product_PriceAnnotationIsCultureInvariant()
+        {
+            var originalCulture = CultureInfo.CurrentCulture;
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+                var product = new Product
+                {
+                    Name = "Product",
+                    Sku = "SKU-1",
+                    Price = 19.95m,
+                    StockQuantity = 1
+                };
+
+                var validationResults = new System.Collections.Generic.List<ValidationResult>();
+                var isValid = Validator.TryValidateObject(
+                    product,
+                    new ValidationContext(product),
+                    validationResults,
+                    validateAllProperties: true);
+
+                Assert.IsTrue(isValid);
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = originalCulture;
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(2601, true)]
+        [DataRow(2627, true)]
+        [DataRow(547, false)]
+        [DataRow(8152, false)]
+        public void ProductDatabaseErrorClassifier_OnlyMatchesUniqueConstraintErrors(int errorNumber, bool expected)
+        {
+            Assert.AreEqual(expected, ProductDatabaseErrorClassifier.IsUniqueConstraintViolation(new[] { errorNumber }));
         }
 
         private static void AssertInvalid(
